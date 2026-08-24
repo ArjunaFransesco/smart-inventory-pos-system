@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Inventory Master{% endblock %}
+{% block content %}
+<div class="flex justify-between items-center">
+  <div>
+    <h2 class="text-xl font-bold text-white">Inventory Stock Master</h2>
+    <p class="text-xs text-slate-400">Product catalog, pricing margins, stock movement, and supplier records.</p>
+  </div>
+</div>
+
+<div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+  <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+    <h3 class="text-sm font-bold text-white">All Stock Items ({{ products|length }})</h3>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-xs">
+      <thead class="bg-slate-900/60 text-slate-400 border-b border-slate-800">
+        <tr>
+          <th class="py-3 px-4">SKU</th><th>Product Name</th><th>Category</th><th>Cost Price</th><th>Selling Price</th><th>Margin</th><th>Stock</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-800 text-slate-300">
+        {% for p in products %}
+        <tr class="hover:bg-slate-900/40 transition-colors">
+          <td class="py-3 px-4 font-mono font-bold text-blue-400">{{ p.sku }}</td>
+          <td class="font-medium text-white">{{ p.name }}</td>
+          <td><span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300 text-[11px]">{{ p.category_name }}</span></td>
+          <td>Rp {{ "{:,.0f}".format(p.cost_price) }}</td>
+          <td class="font-semibold text-emerald-400">Rp {{ "{:,.0f}".format(p.selling_price) }}</td>
+          <td class="text-slate-400">{{ "{:.1f}%".format(((p.selling_price - p.cost_price) / p.selling_price) * 100) }}</td>
+          <td class="font-bold {% if p.stock_quantity <= p.min_reorder_level %}text-amber-400{% else %}text-slate-100{% endif %}">{{ p.stock_quantity }}</td>
+          <td>
+            {% if p.stock_quantity <= p.min_reorder_level %}
+            <span class="px-2 py-0.5 rounded bg-amber-950/60 text-amber-400 border border-amber-800 font-bold text-[10px]">LOW STOCK</span>
+            {% else %}
+            <span class="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-400 border border-emerald-800 font-bold text-[10px]">IN STOCK</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

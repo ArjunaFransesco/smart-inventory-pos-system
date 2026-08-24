@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}POS Terminal{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-4">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-bold text-white"><i class="fa-solid fa-cash-register text-blue-500 mr-2"></i>POS Cashier Terminal</h2>
+      <span class="text-xs text-slate-400">Cashier: <strong>Arjuna Fransesco</strong></span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {% for p in products %}
+      <div onclick="addToCart({{ p.id }}, '{{ p.name }}', {{ p.selling_price }}, {{ p.stock_quantity }})" 
+           class="bg-slate-950 border border-slate-800 hover:border-blue-500 rounded-xl p-3.5 cursor-pointer transition-all hover:-translate-y-0.5 space-y-2 flex flex-col justify-between">
+        <div>
+          <span class="text-[10px] text-slate-400 font-mono">{{ p.sku }}</span>
+          <h4 class="text-xs font-bold text-white line-clamp-2">{{ p.name }}</h4>
+        </div>
+        <div class="flex justify-between items-center pt-2 border-t border-slate-800/80">
+          <span class="text-xs font-extrabold text-emerald-400">Rp {{ "{:,.0f}".format(p.selling_price) }}</span>
+          <span class="text-[10px] text-slate-400">Stock: {{ p.stock_quantity }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between space-y-4 h-fit sticky top-20">
+    <div class="space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-cart-shopping text-emerald-400 mr-1.5"></i>Current Order</h3>
+        <button onclick="clearCart()" class="text-xs text-red-400 hover:underline">Clear</button>
+      </div>
+      <div id="cartList" class="space-y-2 max-h-64 overflow-y-auto pr-1 text-xs">
+        <p class="text-slate-500 text-center py-6">Cart is empty. Click items on the left to add.</p>
+      </div>
+    </div>
+
+    <div class="space-y-3 pt-4 border-t border-slate-800">
+      <div class="flex justify-between items-center text-sm font-bold text-white">
+        <span>Grand Total</span>
+        <span id="grandTotal" class="text-emerald-400 text-lg">Rp 0</span>
+      </div>
+      <div class="space-y-2">
+        <label class="text-[11px] text-slate-400 block font-medium">Payment Mode</label>
+        <select id="paymentMethod" class="w-full bg-slate-900 border border-slate-700 text-white rounded-lg p-2 text-xs focus:ring-1 focus:ring-blue-500 outline-none">
+          <option value="CASH">Cash / Tunai</option>
+          <option value="QRIS">QRIS / Instant Payment</option>
+          <option value="DEBIT_CARD">Debit Card / EDC</option>
+          <option value="TRANSFER">Bank Transfer</option>
+        </select>
+      </div>
+      <button onclick="processCheckout()" id="checkoutBtn" disabled class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-800 disabled:text-slate-500 text-white font-bold text-xs rounded-lg transition-colors shadow-sm">
+        Complete Transaction
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let cart = [];
+function addToCart(id, name, price, maxStock) {
+  const existing = cart.find(item => item.id === id);
+  if (existing) {
+    if (existing.qty < maxStock) {
+      existing.qty += 1;
+    } else {
+      alert('Maximum available stock reached!');
+    }
+  } else {
+    cart.push({ id, name, price, qty: 1, maxStock });
+  }
+  renderCart();
+}
+function updateQty(id, delta) {
+  const item = cart.find(i => i.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) {
+    cart = cart.filter(i => i.id !== id);
+  }
+  renderCart();
+}
+function clearCart() {
+  cart = [];
+  renderCart();
+}
+function renderCart() {
+  const list = document.getElementById('cartList');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  const totalEl = document.getElementById('grandTotal');
+  if (cart.length === 0) {
+    list.innerHTML = `<p class="text-slate-500 text-center py-6">Cart is empty. Click items on the left to add.</p>`;
+    checkoutBtn.disabled = true;
+    totalEl.innerText = 'Rp 0';
+    return;
+  }
+  let total = 0;
+  list.innerHTML = cart.map(item => {
+    const sub = item.price * item.qty;
+    total += sub;
+    return `
+      <div class="flex justify-between items-center bg-slate-900 p-2 rounded border border-slate-800">
+        <div class="flex-1 pr-2">
+          <div class="font-medium text-white truncate">${item.name}</div>
+          <div class="text-[10px] text-emerald-400">Rp ${item.price.toLocaleString()} x ${item.qty}</div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button onclick="updateQty(${item.id}, -1)" class="w-5 h-5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded flex items-center justify-center font-bold">-</button>
+          <span class="text-xs font-bold text-white px-1">${item.qty}</span>
+          <button onclick="updateQty(${item.id}, 1)" class="w-5 h-5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded flex items-center justify-center font-bold">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  checkoutBtn.disabled = false;
+  totalEl.innerText = 'Rp ' + total.toLocaleString();
+}
+async function processCheckout() {
+  if (cart.length === 0) return;
+  const payMethod = document.getElementById('paymentMethod').value;
+  try {
+    const res = await fetch('/api/pos/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: cart, payment_method: payMethod })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('✅ Transaction Successful! Invoice: ' + data.invoice + ' | Total: Rp ' + data.total.toLocaleString());
+      clearCart();
+      window.location.reload();
+    } else {
+      alert('Error: ' + data.error);
+    }
+  } catch (err) {
+    alert('Network error: ' + err.message);
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Smart Inventory & POS System{% endblock %} | Arjuna Fransesco</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+  <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-black text-white text-sm shadow-sm">SI</div>
+        <div>
+          <h1 class="text-sm font-bold text-white tracking-wide">Smart Inventory & POS</h1>
+          <p class="text-[11px] text-slate-400">Warehouse Information System</p>
+        </div>
+      </div>
+      <nav class="flex items-center gap-1 sm:gap-2 text-xs font-semibold">
+        <a href="/" class="px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"><i class="fa-solid fa-chart-pie mr-1.5 text-blue-400"></i>Dashboard</a>
+        <a href="/inventory" class="px-3 py-2 rounded-lg hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"><i class="fa-solid fa-boxes-stacked mr-1.5 text-emerald-400"></i>Inventory</a>
+        <a href="/pos" class="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"><i class="fa-solid fa-cash-register mr-1.5"></i>POS Cashier</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bg-slate-950 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+    Smart Inventory & POS Information System • Built by <a href="https://github.com/ArjunaFransesco" class="text-blue-400 hover:underline font-medium">Arjuna Fransesco</a>
+  </footer>
+</body>
+</html>
